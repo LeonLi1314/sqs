@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+                        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+	
+	<bean id="ruleMatcher" class="com.rtmap.traffic.sqs.service.impl.RuleMatcher">
+		<constructor-arg index="0" type="java.util.List">
+			<list>
+				<ref bean="statusRule1"></ref>
+				<ref bean="statusRule2"></ref>
+				<ref bean="statusRule3"></ref>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="statusRule1" class="com.rtmap.traffic.sqs.domain.StatusRule">
+		<property name="floor" value="0" />
+		<property name="ceiling" value="360" />
+		<property name="status" value="通畅" />
+		<property name="color" value="GREEN" />
+	</bean>
+
+	<bean id="statusRule2" class="com.rtmap.traffic.sqs.domain.StatusRule">
+		<property name="floor" value="361" />
+		<property name="ceiling" value="600" />
+		<property name="status" value="缓慢" />
+		<property name="color" value="YELLOW" />
+	</bean>
+
+	<bean id="statusRule3" class="com.rtmap.traffic.sqs.domain.StatusRule">
+		<property name="floor" value="601" />
+		<property name="ceiling" value="3600" />
+		<property name="status" value="拥堵" />
+		<property name="color" value="RED" />
+	</bean>
+</beans>
