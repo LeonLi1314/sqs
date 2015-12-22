@@ -40,7 +40,7 @@ public interface IProfessionResultSegmtDao {
 	 *            结束时间
 	 * @param topNum
 	 *            取前几个值
-	 * @return
+	 * @return 时间点集合
 	 */
 	List<Date> selectTopOfAvgDuarOfSegmts(Date beginDate, Date endDate, int topNum);
 
