@@ -27,4 +27,11 @@ public class SecurityQueueController {
 	public SecurityResult getLatestProfessionResult() {
 		return securityQueueService.getLatestProfessionResult();
 	}
+
+	@ResponseBody
+	@RequestMapping(value = "/latestXmlResult.do", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+	public String getLatestProfessionXmlResult() {
+		String rst = securityQueueService.getLatestProfessionXmlResult();
+		return rst;
+	}
 }

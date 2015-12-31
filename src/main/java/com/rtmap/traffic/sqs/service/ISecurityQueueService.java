@@ -16,4 +16,6 @@ public interface ISecurityQueueService {
 	 */
 	SecurityResult getLatestProfessionResult();
 
+	String getLatestProfessionXmlResult();
+
 }

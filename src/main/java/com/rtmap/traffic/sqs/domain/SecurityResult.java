@@ -62,12 +62,12 @@ public class SecurityResult {
 	private String area;
 	private int waitingTime;
 	private int loadfactor;
-	private String watingStatus;
-	private String watingLevel;
-	private int watingPeopleCount;
+	private String waitingStatus;
+	private String waitingLevel;
+	private int waitingPeopleCount;
 	private int passRate;
-	private String watingPeakTime;
-	private String dailyWatingLevel;
+	private String waitingPeakTime;
+	private String dailyWaitingLevel;
 
 	/**
 	 * 获取消息事件类型
@@ -143,44 +143,44 @@ public class SecurityResult {
 	/**
 	 * 获取等待时长对应显示的文字提示（顺畅|需排队等候|拥堵 后续后台可配置规则）
 	 */
-	public String getWatingStatus() {
-		return watingStatus;
+	public String getWaitingStatus() {
+		return waitingStatus;
 	}
 
 	/**
 	 * 设置等待时长对应显示的文字提示（顺畅|需排队等候|拥堵 后续后台可配置规则）
 	 */
-	public void setWatingStatus(String watingStatus) {
-		this.watingStatus = watingStatus;
+	public void setWaitingStatus(String watingStatus) {
+		this.waitingStatus = watingStatus;
 	}
 
 	/**
 	 * 获取等待时长对应显示的级别（顺畅对应绿色GREEN|需排队等候对应黄色YELLOW|拥堵对应红色RED 后续后台可配置规则）
 	 */
-	public String getWatingLevel() {
-		return watingLevel;
+	public String getWaitingLevel() {
+		return waitingLevel;
 	}
 
 	/**
 	 * 设置等待时长对应显示的级别（顺畅对应绿色GREEN|需排队等候对应黄色YELLOW|拥堵对应红色RED 后续后台可配置规则）
 	 */
-	public void setWatingLevel(String watingLevel) {
-		this.watingLevel = watingLevel;
+	public void setWaitingLevel(String watingLevel) {
+		this.waitingLevel = watingLevel;
 	}
 
 	/**
 	 * 获取排队等候区当前估算人数（单位：个）。暂不提供
 	 */
 	// @JSONField(serialize = false)
-	public int getWatingPeopleCount() {
-		return watingPeopleCount;
+	public int getWaitingPeopleCount() {
+		return waitingPeopleCount;
 	}
 
 	/**
 	 * 设置排队等候区当前估算人数（单位：个）
 	 */
-	public void setWatingPeopleCount(int watingPeopleCount) {
-		this.watingPeopleCount = watingPeopleCount;
+	public void setWaitingPeopleCount(int watingPeopleCount) {
+		this.waitingPeopleCount = watingPeopleCount;
 	}
 
 	/**
@@ -200,28 +200,28 @@ public class SecurityResult {
 	/**
 	 * 获取等待时长四个高峰时间点，规格HH24:mi|分割。
 	 */
-	public String getWatingPeakTime() {
-		return watingPeakTime;
+	public String getWaitingPeakTime() {
+		return waitingPeakTime;
 	}
 
 	/**
 	 * 设置等待时长四个高峰时间点，规格HH24:mi|分割。
 	 */
-	public void setWatingPeakTime(String watingPeakTime) {
-		this.watingPeakTime = watingPeakTime;
+	public void setWaitingPeakTime(String watingPeakTime) {
+		this.waitingPeakTime = watingPeakTime;
 	}
 
 	/**
 	 * 获取5点-22点 每小时段内整体状态水平，顺畅对应绿色GREEN|需排队等候对应黄色YELLOW|拥堵对应红色RED。
 	 */
-	public String getDailyWatingLevel() {
-		return dailyWatingLevel;
+	public String getDailyWaitingLevel() {
+		return dailyWaitingLevel;
 	}
 
 	/**
 	 * 设置5点-22点 每小时段内整体状态水平，顺畅对应绿色GREEN|需排队等候对应黄色YELLOW|拥堵对应红色RED。
 	 */
-	public void setDailyWatingLevel(String dailyWatingLevel) {
-		this.dailyWatingLevel = dailyWatingLevel;
+	public void setDailyWaitingLevel(String dailyWatingLevel) {
+		this.dailyWaitingLevel = dailyWatingLevel;
 	}
 }

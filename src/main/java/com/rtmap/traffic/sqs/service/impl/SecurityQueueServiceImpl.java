@@ -1,16 +1,27 @@
 package com.rtmap.traffic.sqs.service.impl;
 
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.rtmap.traffic.sqs.dao.IProfessionResultSegmtDao;
+import com.rtmap.traffic.sqs.domain.AsupBody;
+import com.rtmap.traffic.sqs.domain.AsupBodyMsg;
+import com.rtmap.traffic.sqs.domain.AsupData;
+import com.rtmap.traffic.sqs.domain.AsupHeader;
 import com.rtmap.traffic.sqs.domain.ProfessionResultSegmt;
+import com.rtmap.traffic.sqs.domain.SecurityInfo;
+import com.rtmap.traffic.sqs.domain.SecurityInfoBody;
+import com.rtmap.traffic.sqs.domain.SecurityInfoMeta;
 import com.rtmap.traffic.sqs.domain.SecurityResult;
 import com.rtmap.traffic.sqs.domain.StatusRule;
 import com.rtmap.traffic.sqs.service.ISecurityQueueService;
@@ -78,9 +89,9 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 		rst.setArea("T3C-D");
 		rst.setWaitingTime(segmt.getAvgDuar() / 60);
 		rst.setLoadfactor((int) loadRate);
-		rst.setWatingStatus(statusRule.getStatus());
-		rst.setWatingLevel(statusRule.getColor());
-		rst.setWatingPeopleCount(-1);
+		rst.setWaitingStatus(statusRule.getStatus());
+		rst.setWaitingLevel(statusRule.getColor());
+		rst.setWaitingPeopleCount(-1);
 		rst.setPassRate((int) segmt.getPassRate());
 
 		StringBuilder timeSb = new StringBuilder(32);
@@ -88,15 +99,69 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 			timeSb.append(DateUtils.formatDate(setmt, "HH:mm"));
 			timeSb.append("|");
 		}
-		rst.setWatingPeakTime(timeSb.substring(0, timeSb.length() - 1).toString());
+		rst.setWaitingPeakTime(timeSb.substring(0, timeSb.length() - 1).toString());
 
 		StringBuilder colorSb = new StringBuilder(126);
 		for (Integer integer : avgDuars) {
 			colorSb.append(matcher.match(integer.intValue()).getColor());
 			colorSb.append("|");
 		}
-		rst.setDailyWatingLevel(colorSb.substring(0, colorSb.length() - 1).toString());
+		rst.setDailyWaitingLevel(colorSb.substring(0, colorSb.length() - 1).toString());
 
 		return rst;
+	}
+
+	@Override
+	public String  getLatestProfessionXmlResult(){
+		SecurityResult result = getLatestProfessionResult();
+		
+		AsupData data = new AsupData();
+		AsupHeader asupHeader = new AsupHeader();
+		asupHeader.setServiceName("SECURITYINFO");
+		asupHeader.setSendSystem("RTMAP");
+		asupHeader.setCreateTime(DateUtils.getCurrentDateTime());
+		AsupBody asupBody = new AsupBody();
+		data.setAsupHeader(asupHeader);
+		data.setAsupBody(asupBody);
+		
+		AsupBodyMsg asupBodyMsg = new AsupBodyMsg();
+		asupBody.setMsg(asupBodyMsg);
+		
+		SecurityInfo securityInfo = new SecurityInfo();
+		asupBodyMsg.setSecurityInfo(securityInfo);
+		
+		SecurityInfoMeta infoMeta = new SecurityInfoMeta();
+		infoMeta.setEvnt(result.getEvnt());
+		infoMeta.setDttm(result.getDttm());
+		SecurityInfoBody infoBody = new SecurityInfoBody();
+		infoBody.setArea(result.getArea());
+		infoBody.setWaitingTime(result.getWaitingTime());
+		infoBody.setLoadfactor(result.getLoadfactor());
+		infoBody.setWaitingStatus(result.getWaitingStatus());
+		infoBody.setWaitingLevel(result.getWaitingLevel());
+		infoBody.setWaitingPeopleCount(result.getWaitingPeopleCount());
+		infoBody.setPassRate(result.getPassRate());
+		infoBody.setWaitingPeakTime(result.getWaitingPeakTime());
+		infoBody.setDailyWatingLevel(result.getDailyWaitingLevel());
+		
+		securityInfo.setMeta(infoMeta);
+		securityInfo.setBody(infoBody);
+		
+		JAXBContext jaxbContext;
+		
+		try {
+			jaxbContext = JAXBContext.newInstance(AsupData.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+	        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);  
+	        StringWriter writer = new StringWriter();  
+	        jaxbMarshaller.marshal(data, writer);
+	        
+	        return writer.toString();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return null;
 	}
 }

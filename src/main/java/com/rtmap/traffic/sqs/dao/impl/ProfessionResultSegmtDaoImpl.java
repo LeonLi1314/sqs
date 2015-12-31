@@ -1,7 +1,10 @@
 package com.rtmap.traffic.sqs.dao.impl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 
@@ -26,8 +29,26 @@ import lqs.frame.util.DateUtils;
 @Repository
 public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 	@Resource(name = "jdbcTemplate")
-	//@Resource
+	// @Resource
 	private JdbcTemplate jdbcTemplate;
+
+	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+	static final String DB_URL = "jdbc:mysql://localhost/";
+	static final String USER = "lqs";
+	static final String PASS = "1213";
+
+	public void selectProfessionResultSegmt() throws SQLException, ClassNotFoundException {
+		Class.forName(JDBC_DRIVER);
+		Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		Statement stmt = conn.createStatement();
+		String sql = "select * from profession_result_segmt";
+		ResultSet result = stmt.executeQuery(sql);
+		
+		while (result.next()) {
+			result.getString(0);
+			// ...
+		}
+	}
 
 	@Override
 	public ProfessionResultSegmt selectLatestByPorcessTime(Date processTime) {
