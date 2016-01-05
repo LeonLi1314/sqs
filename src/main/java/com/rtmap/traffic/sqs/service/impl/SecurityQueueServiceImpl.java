@@ -47,16 +47,16 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 	@Override
 	public SecurityResult getLatestProfessionResult() {
 		// 查找当前十一分钟内最新的数据
-		// Date date = DateUtils.addMinute(new Date(), -11);
-		// test
-		Date date = DateUtils.parseDate("2015-11-08");
+		Date date = DateUtils.addMinute(new Date(), -11);
+		// mytest
+		// Date date = DateUtils.parseDate("2015-11-08");
 
 		ProfessionResultSegmt segmt = dao.selectLatestByPorcessTime(date);
 
 		// 查询前一天高峰的时间点
-		// Date endDate = DateUtils.getCurrentDate();
-		// test
-		Date endDate = DateUtils.parseDate("2015-11-08");
+		Date endDate = DateUtils.getCurrentDate();
+		// mytest
+		// Date endDate = DateUtils.parseDate("2015-11-08");
 		Date beginDate = DateUtils.addDay(endDate, -1);
 		int topNum = 4;
 		List<Date> setmts = dao.selectTopOfAvgDuarOfSegmts(beginDate, endDate, topNum);
@@ -79,15 +79,15 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 
 		// 各数据获取成功，组装返回对象
 
-		double loadRate = (segmt.getAvgDuar() / 480.0) * 100;
-		StatusRule statusRule = matcher.match(segmt.getAvgDuar());
+		double loadRate = (segmt.getMedianDuar() / 480.0) * 100;
+		StatusRule statusRule = matcher.match(segmt.getMedianDuar());
 		rst.setStatusCode(100);
 		rst.setMessage("成功");
 
 		rst.setEvnt("STANDARDSECURITYINFO");
 		rst.setDttm(DateUtils.getCurrentDateTime());
 		rst.setArea("T3C-D");
-		rst.setWaitingTime(segmt.getAvgDuar() / 60);
+		rst.setWaitingTime(segmt.getMedianDuar() / 60);
 		rst.setLoadfactor((int) loadRate);
 		rst.setWaitingStatus(statusRule.getStatus());
 		rst.setWaitingLevel(statusRule.getColor());
@@ -110,15 +110,63 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 
 		return rst;
 	}
+	
+	@Override
+	public AsupData  getLatestProfessionData(){
+		SecurityResult result = getLatestProfessionResult();
+		
+		if(result.getStatusCode() == -1){
+			logger.error(result.getMessage());
+			return null;
+		}
+		
+		AsupData data = new AsupData();
+		AsupHeader asupHeader = new AsupHeader();
+		asupHeader.setServiceName("SMISPDINFO");
+		asupHeader.setSendSystem("SMISPD");
+		asupHeader.setCreateTime(DateUtils.getCurrentDateTime());
+		AsupBody asupBody = new AsupBody();
+		data.setAsupHeader(asupHeader);
+		data.setAsupBody(asupBody);
+		
+		AsupBodyMsg asupBodyMsg = new AsupBodyMsg();
+		asupBody.setMsg(asupBodyMsg);
+		
+		SecurityInfo securityInfo = new SecurityInfo();
+		asupBodyMsg.setSecurityInfo(securityInfo);
+		
+		SecurityInfoMeta infoMeta = new SecurityInfoMeta();
+		infoMeta.setEvnt(result.getEvnt());
+		infoMeta.setDttm(result.getDttm());
+		SecurityInfoBody infoBody = new SecurityInfoBody();
+		infoBody.setArea(result.getArea());
+		infoBody.setWaitingTime(result.getWaitingTime());
+		infoBody.setLoadfactor(result.getLoadfactor());
+		infoBody.setWaitingStatus(result.getWaitingStatus());
+		infoBody.setWaitingLevel(result.getWaitingLevel());
+		infoBody.setWaitingPeopleCount(result.getWaitingPeopleCount());
+		infoBody.setPassRate(result.getPassRate());
+		infoBody.setWaitingPeakTime(result.getWaitingPeakTime());
+		infoBody.setDailyWatingLevel(result.getDailyWaitingLevel());
+		
+		securityInfo.setMeta(infoMeta);
+		securityInfo.setBody(infoBody);
+		return data;
+	}
 
 	@Override
 	public String  getLatestProfessionXmlResult(){
 		SecurityResult result = getLatestProfessionResult();
 		
+		if(result.getStatusCode() == -1){
+			logger.error(result.getMessage());
+			return null;
+		}
+		
 		AsupData data = new AsupData();
 		AsupHeader asupHeader = new AsupHeader();
-		asupHeader.setServiceName("SECURITYINFO");
-		asupHeader.setSendSystem("RTMAP");
+		asupHeader.setServiceName("SMISPDINFO");
+		asupHeader.setSendSystem("SMISPD");
 		asupHeader.setCreateTime(DateUtils.getCurrentDateTime());
 		AsupBody asupBody = new AsupBody();
 		data.setAsupHeader(asupHeader);
@@ -158,7 +206,7 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 	        
 	        return writer.toString();
 		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
+			logger.error("JAXB 对象转化 XML 错误" + e.toString());
 			e.printStackTrace();
 		} 
 		

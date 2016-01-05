@@ -16,20 +16,20 @@
 
 	<bean id="statusRule1" class="com.rtmap.traffic.sqs.domain.StatusRule">
 		<property name="floor" value="0" />
-		<property name="ceiling" value="360" />
+		<property name="ceiling" value="480" />
 		<property name="status" value="通畅" />
 		<property name="color" value="GREEN" />
 	</bean>
 
 	<bean id="statusRule2" class="com.rtmap.traffic.sqs.domain.StatusRule">
-		<property name="floor" value="361" />
-		<property name="ceiling" value="600" />
+		<property name="floor" value="481" />
+		<property name="ceiling" value="720" />
 		<property name="status" value="缓慢" />
 		<property name="color" value="YELLOW" />
 	</bean>
 
 	<bean id="statusRule3" class="com.rtmap.traffic.sqs.domain.StatusRule">
-		<property name="floor" value="601" />
+		<property name="floor" value="721" />
 		<property name="ceiling" value="3600" />
 		<property name="status" value="拥堵" />
 		<property name="color" value="RED" />
