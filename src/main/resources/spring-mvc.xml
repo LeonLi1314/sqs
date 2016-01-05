@@ -41,7 +41,7 @@
 					</list>
 				</property>
 			</bean>
-			<bean class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" />
+<!-- 			<bean class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" /> -->
 <!-- 			<bean id="marshallingHttpMessageConverter" -->
 <!-- 				class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter"> -->
 <!-- 				<property name="marshaller" ref="castorMarshaller" /> -->

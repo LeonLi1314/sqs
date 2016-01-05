@@ -46,17 +46,16 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 
 	@Override
 	public SecurityResult getLatestProfessionResult() {
-		// 查找当前十一分钟内最新的数据
-		Date date = DateUtils.addMinute(new Date(), -11);
+		Date currDate = DateUtils.getCurrentDateTime();
 		// mytest
-		// Date date = DateUtils.parseDate("2015-11-08");
+		// currDate = DateUtils.parseDate("2015-11-08");
+		// 查找当前十一分钟内最新的数据
+		Date date = DateUtils.addMinute(currDate, -11);
 
 		ProfessionResultSegmt segmt = dao.selectLatestByPorcessTime(date);
 
 		// 查询前一天高峰的时间点
-		Date endDate = DateUtils.getCurrentDate();
-		// mytest
-		// Date endDate = DateUtils.parseDate("2015-11-08");
+		Date endDate = DateUtils.getDate(currDate);
 		Date beginDate = DateUtils.addDay(endDate, -1);
 		int topNum = 4;
 		List<Date> setmts = dao.selectTopOfAvgDuarOfSegmts(beginDate, endDate, topNum);

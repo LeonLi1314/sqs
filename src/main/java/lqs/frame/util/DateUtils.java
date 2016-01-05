@@ -325,6 +325,18 @@ public class DateUtils {
 	}
 
 	/**
+	 * 获取指定时间的日期部分
+	 * 
+	 * @param datetime
+	 *            指定时间
+	 * @return 日期部分
+	 */
+	public static Date getDate(Date datetime) {
+		String date = new SimpleDateFormat(DatePatterns.POPULAR_DATE).format(datetime);
+		return parseDate(date);
+	}
+
+	/**
 	 * 增加指定天数，可以跨月
 	 * 
 	 * @param strDate
