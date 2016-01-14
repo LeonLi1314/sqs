@@ -43,7 +43,7 @@ public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 		Statement stmt = conn.createStatement();
 		String sql = "select * from profession_result_segmt";
 		ResultSet result = stmt.executeQuery(sql);
-		
+
 		while (result.next()) {
 			result.getString(0);
 			// ...
@@ -73,9 +73,9 @@ public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 			}
 		}, DateUtils.getTimestamp(processTime));
 
-		if(model.getId() == null)
+		if (model.getId() == null)
 			return null;
-		
+
 		return model;
 	}
 
@@ -108,11 +108,15 @@ public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 	}
 
 	@Override
-	public List<Date> selectTopOfAvgDuarOfSegmts(Date beginDate, Date endDate, int topNum) {
+	public List<Date> selectTopOfAvgDuarOfSegmts(Date beginDate, Date endDate, int topNum, boolean isMedianDur) {
 		StringBuilder commanText = new StringBuilder(128);
 		commanText.append("select segmt from profession_result_segmt");
 		commanText.append(" where process_time >= ? and process_time < ?");
-		commanText.append(" order by median_duar desc limit ?");
+		if (isMedianDur) {
+			commanText.append(" order by median_duar desc limit ?");
+		} else {
+			commanText.append(" order by avg_duar desc limit ?");
+		}
 
 		List<Date> rst = jdbcTemplate.query(commanText.toString(), new RowMapper<Date>() {
 			@Override
@@ -125,11 +129,21 @@ public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 	}
 
 	@Override
-	public List<Integer> selectPerHourAvgDuars(Date beginDate, Date endDate) {
+	public List<Integer> selectPerHourAvgDuars(Date beginDate, Date endDate, boolean isMedianDur) {
 		StringBuilder commanText = new StringBuilder(128);
-		commanText.append("select round(AVG(t.median_duar), 0) as median_duar from");
+		String duar;
+		if (isMedianDur) {
+			duar = " median_duar";
+		} else {
+			duar = " avg_duar";
+		}
+
+		commanText.append("select round(AVG(t.temp_duar), 0) as temp_duar from");
 		commanText.append(" (");
-		commanText.append("select median_duar, date_format(segmt,'%H') as hour_info from profession_result_segmt");
+		commanText.append("select ");
+		commanText.append(duar);
+		commanText.append(" as temp_duar, ");
+		commanText.append(" date_format(segmt,'%H') as hour_info from profession_result_segmt");
 		commanText.append(" where segmt >= ? and segmt < ?");
 		commanText.append(" order by segmt");
 		commanText.append(") t");
@@ -138,7 +152,7 @@ public class ProfessionResultSegmtDaoImpl implements IProfessionResultSegmtDao {
 		List<Integer> rst = jdbcTemplate.query(commanText.toString(), new RowMapper<Integer>() {
 			@Override
 			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return rs.getInt("median_duar");
+				return rs.getInt("temp_duar");
 			}
 		}, DateUtils.getTimestamp(beginDate), DateUtils.getTimestamp(endDate));
 

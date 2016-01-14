@@ -26,22 +26,28 @@ public class SecurityQueueController {
 	@ResponseBody
 	@RequestMapping(value = "/latestJsonResult.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
 	public SecurityResult getLatestProfessionResult() {
-		return securityQueueService.getLatestProfessionResult();
+		return securityQueueService.getLatestAvgProfessionResult();
 	}
 
 	@ResponseBody
 	@RequestMapping(value = "/latestXmlResult.do", method = RequestMethod.GET, produces = "application/xml;charset=UTF-8" )
 	public AsupData getLatestProfessionData() {
-		AsupData rst = securityQueueService.getLatestProfessionData();
+		AsupData rst = securityQueueService.getLatestAvgProfessionData();
 
 		return rst;
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/latestJsonMedianResult.do", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
+	public SecurityResult getLatestMedianProfessionResult() {
+		return securityQueueService.getLatestMedianProfessionResult();
+	}
 
 	@ResponseBody
-	@RequestMapping(value = "/latestXmlStrResult.do", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-	public String getLatestProfessionXmlResult() {
-		String rst = securityQueueService.getLatestProfessionXmlResult();
-		rst.replaceAll("\r|\n", "");
+	@RequestMapping(value = "/latestXmlMedianResult.do", method = RequestMethod.GET, produces = "application/xml;charset=UTF-8" )
+	public AsupData getLatestMedianProfessionData() {
+		AsupData rst = securityQueueService.getLatestMedianProfessionData();
+
 		return rst;
 	}
 }

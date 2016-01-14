@@ -40,9 +40,11 @@ public interface IProfessionResultSegmtDao {
 	 *            结束时间
 	 * @param topNum
 	 *            取前几个值
+	 * @param isMedianDur
+	 *            是否取中位数，否则取平均数
 	 * @return 时间点集合
 	 */
-	List<Date> selectTopOfAvgDuarOfSegmts(Date beginDate, Date endDate, int topNum);
+	List<Date> selectTopOfAvgDuarOfSegmts(Date beginDate, Date endDate, int topNum, boolean isMedianDur);
 
 	/**
 	 * 查询指定时间段内每小时的平均等待时长
@@ -51,7 +53,9 @@ public interface IProfessionResultSegmtDao {
 	 *            开始时间
 	 * @param endDate
 	 *            结束时间
+	 * @param isMedianDur
+	 *            是否取中位数，否则取平均数
 	 * @return 每小时平均等待时长集合
 	 */
-	List<Integer> selectPerHourAvgDuars(Date beginDate, Date endDate);
+	List<Integer> selectPerHourAvgDuars(Date beginDate, Date endDate, boolean isMedianDur);
 }

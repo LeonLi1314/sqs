@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.druid.util.StringUtils;
 import com.rtmap.traffic.sqs.dao.IProfessionResultSegmtDao;
 import com.rtmap.traffic.sqs.domain.AsupBody;
 import com.rtmap.traffic.sqs.domain.AsupBodyMsg;
@@ -44,26 +45,32 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 	@Resource
 	private IProfessionResultSegmtDao dao;
 
-	@Override
-	public SecurityResult getLatestProfessionResult() {
+	private String currDateStr;
+
+	public void setCurrDateStr(String currDateStr) {
+		this.currDateStr = currDateStr;
+	}
+
+	public SecurityResult getLatestProfessionResult(boolean isMedian) {
 		Date currDate = DateUtils.getCurrentDateTime();
-		// mytest
-		// currDate = DateUtils.parseDate("2015-11-08");
+		if (!StringUtils.isEmpty(currDateStr)) {
+			currDate = DateUtils.parseDate(currDateStr);
+		}
 		// 查找当前十一分钟内最新的数据
 		Date date = DateUtils.addMinute(currDate, -11);
 
 		ProfessionResultSegmt segmt = dao.selectLatestByPorcessTime(date);
-
-		// 查询前一天高峰的时间点
-		Date endDate = DateUtils.getDate(currDate);
-		Date beginDate = DateUtils.addDay(endDate, -1);
+		// 查询前一天4点至23点的高峰时间点
+		
+		Date endDate = DateUtils.addHour(DateUtils.getDate(currDate), -1);
+		Date beginDate = DateUtils.addHour(DateUtils.addDay(DateUtils.getDate(currDate), -1), 4);
 		int topNum = 4;
-		List<Date> setmts = dao.selectTopOfAvgDuarOfSegmts(beginDate, endDate, topNum);
+		List<Date> setmts = dao.selectTopOfAvgDuarOfSegmts(beginDate, endDate, topNum, isMedian);
 
-		// 查询前一天5点至22点的每小时平均排队等待时长
-		endDate = DateUtils.addHour(endDate, -1);
-		beginDate = DateUtils.addHour(beginDate, 5);
-		List<Integer> avgDuars = dao.selectPerHourAvgDuars(beginDate, endDate);
+		// 查询前一天5点至22点（包含22点之后的分钟）的每小时平均排队等待时长
+		Date endDate1 = DateUtils.addHour(DateUtils.getDate(currDate), -1);
+		Date beginDate1 = DateUtils.addHour(DateUtils.addDay(DateUtils.getDate(currDate), -1), 5);
+		List<Integer> avgDuars = dao.selectPerHourAvgDuars(beginDate1, endDate1, isMedian);
 
 		SecurityResult rst = new SecurityResult();
 
@@ -109,16 +116,15 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 
 		return rst;
 	}
-	
-	@Override
-	public AsupData  getLatestProfessionData(){
-		SecurityResult result = getLatestProfessionResult();
-		
-		if(result.getStatusCode() == -1){
+
+	public AsupData getLatestProfessionData(boolean isMedian) {
+		SecurityResult result = getLatestProfessionResult(isMedian);
+
+		if (result.getStatusCode() == -1) {
 			logger.error(result.getMessage());
 			return null;
 		}
-		
+
 		AsupData data = new AsupData();
 		AsupHeader asupHeader = new AsupHeader();
 		asupHeader.setServiceName("SMISPDINFO");
@@ -127,13 +133,13 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 		AsupBody asupBody = new AsupBody();
 		data.setAsupHeader(asupHeader);
 		data.setAsupBody(asupBody);
-		
+
 		AsupBodyMsg asupBodyMsg = new AsupBodyMsg();
 		asupBody.setMsg(asupBodyMsg);
-		
+
 		SecurityInfo securityInfo = new SecurityInfo();
 		asupBodyMsg.setSecurityInfo(securityInfo);
-		
+
 		SecurityInfoMeta infoMeta = new SecurityInfoMeta();
 		infoMeta.setEvnt(result.getEvnt());
 		infoMeta.setDttm(result.getDttm());
@@ -147,21 +153,21 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 		infoBody.setPassRate(result.getPassRate());
 		infoBody.setWaitingPeakTime(result.getWaitingPeakTime());
 		infoBody.setDailyWatingLevel(result.getDailyWaitingLevel());
-		
+
 		securityInfo.setMeta(infoMeta);
 		securityInfo.setBody(infoBody);
 		return data;
 	}
 
-	@Override
-	public String  getLatestProfessionXmlResult(){
-		SecurityResult result = getLatestProfessionResult();
-		
-		if(result.getStatusCode() == -1){
+	@Deprecated
+	public String getLatestProfessionXmlResult(boolean isMedian) {
+		SecurityResult result = getLatestProfessionResult(isMedian);
+
+		if (result.getStatusCode() == -1) {
 			logger.error(result.getMessage());
 			return null;
 		}
-		
+
 		AsupData data = new AsupData();
 		AsupHeader asupHeader = new AsupHeader();
 		asupHeader.setServiceName("SMISPDINFO");
@@ -170,13 +176,13 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 		AsupBody asupBody = new AsupBody();
 		data.setAsupHeader(asupHeader);
 		data.setAsupBody(asupBody);
-		
+
 		AsupBodyMsg asupBodyMsg = new AsupBodyMsg();
 		asupBody.setMsg(asupBodyMsg);
-		
+
 		SecurityInfo securityInfo = new SecurityInfo();
 		asupBodyMsg.setSecurityInfo(securityInfo);
-		
+
 		SecurityInfoMeta infoMeta = new SecurityInfoMeta();
 		infoMeta.setEvnt(result.getEvnt());
 		infoMeta.setDttm(result.getDttm());
@@ -190,25 +196,45 @@ public class SecurityQueueServiceImpl implements ISecurityQueueService {
 		infoBody.setPassRate(result.getPassRate());
 		infoBody.setWaitingPeakTime(result.getWaitingPeakTime());
 		infoBody.setDailyWatingLevel(result.getDailyWaitingLevel());
-		
+
 		securityInfo.setMeta(infoMeta);
 		securityInfo.setBody(infoBody);
-		
+
 		JAXBContext jaxbContext;
-		
+
 		try {
 			jaxbContext = JAXBContext.newInstance(AsupData.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-	        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);  
-	        StringWriter writer = new StringWriter();  
-	        jaxbMarshaller.marshal(data, writer);
-	        
-	        return writer.toString();
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			StringWriter writer = new StringWriter();
+			jaxbMarshaller.marshal(data, writer);
+
+			return writer.toString();
 		} catch (JAXBException e) {
 			logger.error("JAXB 对象转化 XML 错误" + e.toString());
 			e.printStackTrace();
-		} 
-		
+		}
+
 		return null;
+	}
+
+	@Override
+	public SecurityResult getLatestAvgProfessionResult() {
+		return getLatestProfessionResult(false);
+	}
+
+	@Override
+	public AsupData getLatestAvgProfessionData() {
+		return getLatestProfessionData(false);
+	}
+
+	@Override
+	public SecurityResult getLatestMedianProfessionResult() {
+		return getLatestProfessionResult(true);
+	}
+
+	@Override
+	public AsupData getLatestMedianProfessionData() {
+		return getLatestProfessionData(true);
 	}
 }

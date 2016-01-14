@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans  
                         http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
-	
+
 	<bean id="ruleMatcher" class="com.rtmap.traffic.sqs.service.impl.RuleMatcher">
 		<constructor-arg index="0" type="java.util.List">
 			<list>
@@ -33,5 +33,10 @@
 		<property name="ceiling" value="3600" />
 		<property name="status" value="拥堵" />
 		<property name="color" value="RED" />
+	</bean>
+	<bean id="securityQueueServiceImpl"
+		class="com.rtmap.traffic.sqs.service.impl.SecurityQueueServiceImpl">
+		<!-- dev-test使用 -->
+	<property name="currDateStr" value="2015-11-08" />
 	</bean>
 </beans>

@@ -10,15 +10,11 @@ import com.rtmap.traffic.sqs.domain.SecurityResult;
  *
  */
 public interface ISecurityQueueService {
-	/**
-	 * 获取最近的专业结果
-	 * 
-	 * @return
-	 */
-	SecurityResult getLatestProfessionResult();
+	SecurityResult getLatestAvgProfessionResult();
 
-	String getLatestProfessionXmlResult();
+	AsupData getLatestAvgProfessionData();
 
-	AsupData getLatestProfessionData();
+	SecurityResult getLatestMedianProfessionResult();
 
+	AsupData getLatestMedianProfessionData();
 }
